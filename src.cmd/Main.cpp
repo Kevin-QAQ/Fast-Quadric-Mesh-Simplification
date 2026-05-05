@@ -21,6 +21,7 @@
 #include "Simplify.h"
 #include <stdio.h>
 #include <time.h>  // clock_t, clock, CLOCKS_PER_SEC
+#include <chrono>
 
 void showHelp(const char * argv[]) {
 	const char *cstr = (argv[0]);
@@ -89,7 +90,7 @@ int simplify(const char* file_path, const char* export_path, float reduceFractio
 		printf("Object will not survive such extreme decimation\n");
 		return EXIT_FAILURE;
 	}
-	clock_t start = clock();
+	auto start = std::chrono::steady_clock::now();
 	printf("Input: %zu vertices, %zu triangles (target %d)\n", Simplify::vertices.size(), Simplify::triangles.size(), target_count);
 	int startSize = Simplify::triangles.size();
 	Simplify::simplify_mesh(target_count, agressiveness, true);
@@ -98,6 +99,10 @@ int simplify(const char* file_path, const char* export_path, float reduceFractio
 		printf("Unable to reduce mesh.\n");
 		return EXIT_FAILURE;
 	}
+	auto end = std::chrono::steady_clock::now();
+	auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	printf("Output: %zu vertices, %zu triangles (%f reduction; %.4f sec)\n",Simplify::vertices.size(), Simplify::triangles.size()
+		, (float)Simplify::triangles.size()/ (float) startSize  , elapsed * 1e-3 );
 
 	if (is_obj(export_path)) {
 		printf("exporting obj\n");
@@ -111,8 +116,10 @@ int simplify(const char* file_path, const char* export_path, float reduceFractio
 		return EXIT_FAILURE;
 	}
 
+	end = std::chrono::steady_clock::now();
+	elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 	printf("Output: %zu vertices, %zu triangles (%f reduction; %.4f sec)\n",Simplify::vertices.size(), Simplify::triangles.size()
-		, (float)Simplify::triangles.size()/ (float) startSize  , ((float)(clock()-start))/CLOCKS_PER_SEC );
+		, (float)Simplify::triangles.size()/ (float) startSize  , elapsed * 1e-3 );
 	return EXIT_SUCCESS;
 }
 
@@ -140,7 +147,7 @@ int main(int argc, const char * argv[]) {
 		reduceFraction = atof(argv[3]);
 	}
 	
-	float agressiveness = 7.0;
+	float agressiveness = 3.f;
 	if (argc > 4) {
 		agressiveness = atof(argv[4]);
 	}

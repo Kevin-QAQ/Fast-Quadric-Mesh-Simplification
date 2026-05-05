@@ -7,13 +7,13 @@ WASM := -s DEMANGLE_SUPPORT=1 -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "F
 all: release
 
 release:
-	g++ ${CXX} ${O3} -o simplify
+	g++ ${CXX} ${O3} -fopenmp -o simplify
 
 debug:
-	g++ ${CXX}
+	g++ ${CXX} -fopenmp -o simplify
 
 sanitize:
-	g++ ${CXX} -O1 -g -fsanitize=address -fno-omit-frame-pointer  -o simplify
+	g++ ${CXX} -O1 -g -fsanitize=address -fno-omit-frame-pointer -fopenmp  -o simplify
 #make wasm
 wasm:
 	em++ ${CXX} ${WASM} ${O3}
